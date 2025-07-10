@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puntaje de Golf - Torneo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #1b5e20, #2e7d32);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .add-player {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-player input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .add-player input:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-danger {
+            background: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        .scorecard {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .scorecard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .scorecard-table th {
+            background: linear-gradient(45deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .scorecard-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .scorecard-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .scorecard-table tr:hover {
+            background: #e8f5e8;
+        }
+
+        .player-name {
+            font-weight: bold;
+            text-align: left !important;
+            background: #f0f8f0 !important;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            min-width: 120px;
+        }
+
+        .hole-input {
+            width: 50px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .hole-input:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .total-score {
+            font-weight: bold;
+            font-size: 18px;
+            background: #e8f5e8 !important;
+        }
+
+        .difference {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .difference.positive {
+            color: #d32f2f;
+        }
+
+        .difference.negative {
+            color: #2e7d32;
+        }
+
+        .difference.even {
+            color: #1976d2;
+        }
+
+        .remove-player {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .remove-player:hover {
+            background: #da190b;
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .leaderboard h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .leader-item.first {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            font-weight: bold;
+        }
+
+        .leader-item.second {
+            background: linear-gradient(45deg, #c0c0c0, #e0e0e0);
+        }
+
+        .leader-item.third {
+            background: linear-gradient(45deg, #cd7f32, #d4a574);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .add-player {
+                flex-direction: column;
+            }
+            
+            .hole-input {
+                width: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏌️‍♂️ Torneo de Golf</h1>
+            <p>9 Hoyos Par 3 - Fin de Semana</p>
+        </div>
+
+        <div class="controls">
+            <div class="add-player">
+                <input type="text" id="playerName" placeholder="Nombre del jugador" maxlength="20">
+                <button class="btn" onclick="addPlayer()">Agregar Jugador</button>
+                <button class="btn btn-danger" onclick="clearAll()">Limpiar Todo</button>
+            </div>
+        </div>
+
+        <div class="scorecard">
+            <table class="scorecard-table" id="scoreTable">
+                <thead>
+                    <tr>
+                        <th>Jugador</th>
+                        <th>H1</th>
+                        <th>H2</th>
+                        <th>H3</th>
+                        <th>H4</th>
+                        <th>H5</th>
+                        <th>H6</th>
+                        <th>H7</th>
+                        <th>H8</th>
+                        <th>H9</th>
+                        <th>Total</th>
+                        <th>Diferencia</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreBody">
+                </tbody>
+            </table>
+
+            <div class="leaderboard" id="leaderboard">
+                <h3>🏆 Tabla de Posiciones</h3>
+                <div id="leaderboardContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        const PAR_TOTAL = 27; // 9 hoyos par 3
+
+        function addPlayer() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+            
+            if (name === '') {
+                alert('Por favor ingresa un nombre');
+                return;
+            }
+
+            if (players.find(p => p.name === name)) {
+                alert('El jugador ya existe');
+                return;
+            }
+
+            const player = {
+                name: name,
+                scores: Array(9).fill(0),
+                total: 0,
+                difference: 0
+            };
+
+            players.push(player);
+            nameInput.value = '';
+            renderScorecard();
+            updateLeaderboard();
+        }
+
+        function removePlayer(index) {
+            if (confirm('¿Estás seguro de eliminar este jugador?')) {
+                players.splice(index, 1);
+                renderScorecard();
+                updateLeaderboard();
+            }
+        }
+
+        function updateScore(playerIndex, holeIndex, value) {
+            const score = parseInt(value) || 0;
+            players[playerIndex].scores[holeIndex] = score;
+            
+            // Calcular total
+            players[playerIndex].total = players[playerIndex].scores.reduce((sum, score) => sum + score, 0);
+            
+            // Calcular diferencia con respecto al par
+            players[playerIndex].difference = players[playerIndex].total - PAR_TOTAL;
+            
+            updateTotalAndDifference(playerIndex);
+            updateLeaderboard();
+        }
+
+        function updateTotalAndDifference(playerIndex) {
+            const totalCell = document.getElementById(`total-${playerIndex}`);
+            const diffCell = document.getElementById(`diff-${playerIndex}`);
+            
+            if (totalCell && diffCell) {
+                totalCell.textContent = players[playerIndex].total;
+                
+                const diff = players[playerIndex].difference;
+                diffCell.textContent = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : diff.toString();
+                
+                // Aplicar colores según la diferencia
+                diffCell.className = 'difference';
+                if (diff > 0) {
+                    diffCell.classList.add('positive');
+                } else if (diff < 0) {
+                    diffCell.classList.add('negative');
+                } else {
+                    diffCell.classList.add('even');
+                }
+            }
+        }
+
+        function renderScorecard() {
+            const tbody = document.getElementById('scoreBody');
+            tbody.innerHTML = '';
+
+            players.forEach((player, playerIndex) => {
+                const row = document.createElement('tr');
+                
+                // Nombre del jugador
+                const nameCell = document.createElement('td');
+                nameCell.className = 'player-name';
+                nameCell.textContent = player.name;
+                row.appendChild(nameCell);
+
+                // Hoyos
+                for (let holeIndex = 0; holeIndex < 9; holeIndex++) {
+                    const holeCell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = 'hole-input';
+                    input.min = '1';
+                    input.max = '10';
+                    input.value = player.scores[holeIndex] || '';
+                    input.addEventListener('input', (e) => {
+                        updateScore(playerIndex, holeIndex, e.target.value);
+                    });
+                    holeCell.appendChild(input);
+                    row.appendChild(holeCell);
+                }
+
+                // Total
+                const totalCell = document.createElement('td');
+                totalCell.className = 'total-score';
+                totalCell.id = `total-${playerIndex}`;
+                totalCell.textContent = player.total;
+                row.appendChild(totalCell);
+
+                // Diferencia
+                const diffCell = document.createElement('td');
+                diffCell.id = `diff-${playerIndex}`;
+                const diff = player.difference;
+                diffCell.textContent = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : diff.toString();
+                diffCell.className = 'difference';
+                if (diff > 0) {
+                    diffCell.classList.add('positive');
+                } else if (diff < 0) {
+                    diffCell.classList.add('negative');
+                } else {
+                    diffCell.classList.add('even');
+                }
+                row.appendChild(diffCell);
+
+                // Botón eliminar
+                const actionCell = document.createElement('td');
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-player';
+                removeBtn.textContent = 'Eliminar';
+                removeBtn.onclick = () => removePlayer(playerIndex);
+                actionCell.appendChild(removeBtn);
+                row.appendChild(actionCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            
+            if (players.length === 0) {
+                leaderboardContent.innerHTML = '<p>No hay jugadores agregados</p>';
+                return;
+            }
+
+            // Ordenar jugadores por total (menor es mejor)
+            const sortedPlayers = [...players]
+                .filter(p => p.total > 0)
+                .sort((a, b) => a.total - b.total);
+
+            if (sortedPlayers.length === 0) {
+                leaderboardContent.innerHTML = '<p>No hay puntajes registrados</p>';
+                return;
+            }
+
+            leaderboardContent.innerHTML = '';
+            
+            sortedPlayers.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = 'leader-item';
+                
+                if (index === 0) item.classList.add('first');
+                else if (index === 1) item.classList.add('second');
+                else if (index === 2) item.classList.add('third');
+
+                const diff = player.difference;
+                const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : diff.toString();
+                
+                item.innerHTML = `
+                    <span>${index + 1}. ${player.name}</span>
+                    <span>${player.total} (${diffText})</span>
+                `;
+                
+                leaderboardContent.appendChild(item);
+            });
+        }
+
+        function clearAll() {
+            if (confirm('¿Estás seguro de eliminar todos los jugadores y puntajes?')) {
+                players = [];
+                renderScorecard();
+                updateLeaderboard();
+            }
+        }
+
+        // Agregar jugador con Enter
+        document.getElementById('playerName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+
+        // Inicializar
+        updateLeaderboard();
+    </script>
+</body>
+</html>
